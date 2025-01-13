@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  phoneNumber   String
+  cnpj          String
+  erp           String
+  statusPayment String
+  position      String
+  created_at    DateTime @default(now())
+
+  @@map("users")
+}
+
+/**
+ * vendedor Vendedor
+ * user User => relacionamentos entre tabelas 5:00min
+ * id: "1",
+ * name: "Alessandro Silva",
+ * phoneNumber: "+5567991905052",
+ * cnpj: "123456789",
+ * erp: "id_erp",
+ * statusPaiment: "free",
+ * position: 'Gerente',
+ * res.status(401).json({ code: 'UNAUTHORIZED' }); retorna essa bomba de rota quando o token for invalidate please lembra disto
+ */
