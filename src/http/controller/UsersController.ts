@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { CreateUserService } from '@/services/CreateUser'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
 
@@ -18,16 +18,18 @@ export async function UsersController(
   const { name, cnpj, erp, phoneNumber, position, statusPayment } =
     bodySchema.parse(request.body)
 
-  await prisma.user.create({
-    data: {
+  try {
+    const user = await CreateUserService({
       name,
       cnpj,
       erp,
       phoneNumber,
       position,
       statusPayment,
-    },
-  })
+    })
 
-  return reply.send({ message: 'User created' })
+    return reply.send({ user })
+  } catch (err) {
+    return reply.status(409).send()
+  }
 }
