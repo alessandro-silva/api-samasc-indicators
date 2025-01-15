@@ -1,4 +1,5 @@
-import { UsersRepository } from '@/repositories/UsersRepository'
+import { UserAlreadyExistsError } from '@/errors/UserAlreadyExistsError'
+import { IUsersRepository } from '@/repositories/IUsersRepository'
 
 interface IRequest {
   name: string
@@ -9,24 +10,33 @@ interface IRequest {
   statusPayment: string
 }
 
-export async function CreateUserService({
-  name,
-  cnpj,
-  erp,
-  phoneNumber,
-  position,
-  statusPayment,
-}: IRequest) {
-  const userRepository = new UsersRepository()
+export class CreateUserService {
+  constructor(private userRepository: IUsersRepository) {}
 
-  const user = await userRepository.create({
+  async execute({
     name,
     cnpj,
     erp,
     phoneNumber,
     position,
     statusPayment,
-  })
+  }: IRequest) {
+    const userAlreadyExists =
+      await this.userRepository.findByPhoneNumber(phoneNumber)
 
-  return user
+    if (userAlreadyExists) {
+      throw new UserAlreadyExistsError()
+    }
+
+    const user = await this.userRepository.create({
+      name,
+      cnpj,
+      erp,
+      phoneNumber,
+      position,
+      statusPayment,
+    })
+
+    return user
+  }
 }

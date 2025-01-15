@@ -1,3 +1,5 @@
+import { UserAlreadyExistsError } from '@/errors/UserAlreadyExistsError'
+import { UsersRepository } from '@/repositories/prisma/UsersRepository'
 import { CreateUserService } from '@/services/CreateUser'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { z } from 'zod'
@@ -19,7 +21,10 @@ export async function UsersController(
     bodySchema.parse(request.body)
 
   try {
-    const user = await CreateUserService({
+    const usersRepository = new UsersRepository()
+    const createUserService = new CreateUserService(usersRepository)
+
+    const user = await createUserService.execute({
       name,
       cnpj,
       erp,
@@ -30,6 +35,10 @@ export async function UsersController(
 
     return reply.send({ user })
   } catch (err) {
-    return reply.status(409).send()
+    if (err instanceof UserAlreadyExistsError) {
+      return reply.status(409).send({ message: err.message })
+    }
+
+    return reply.status(500).send({ message: (err as Error).message })
   }
 }

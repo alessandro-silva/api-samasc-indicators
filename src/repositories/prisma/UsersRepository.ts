@@ -1,8 +1,17 @@
 // import { ICreateUserDTO } from '@/dtos/ICreateUser'
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
+import { Prisma, User } from '@prisma/client'
+import { IUsersRepository } from '../IUsersRepository'
 
-export class UsersRepository {
+export class UsersRepository implements IUsersRepository {
+  async findByPhoneNumber(phoneNumber: string): Promise<User | null> {
+    return prisma.user.findFirst({
+      where: {
+        phoneNumber,
+      },
+    })
+  }
+
   async create({
     name,
     cnpj,
